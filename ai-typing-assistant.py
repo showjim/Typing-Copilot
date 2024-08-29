@@ -5,7 +5,9 @@ import httpx
 from pynput import keyboard
 from pynput.keyboard import Key, Controller
 import pyperclip
+from datetime import date
 
+time.sleep(0.1)
 
 controller = Controller()
 
@@ -16,7 +18,7 @@ OLLAMA_CONFIG = {
     "stream": False,
 }
 
-PROMPT_TEMPLATE = Template(
+FIX_PROMPT_TEMPLATE = Template(
     """Fix all typos and casing and punctuation in this text, but preserve all new line characters:
 
 $text
@@ -25,9 +27,19 @@ Return only the corrected text, don't include a preamble.
 """
 )
 
+INSTR_PROMPT_TEMPLATE = Template(
+    """You are AI assistant, a large language model trained by human, based on the AI architecture.
+Knowledge cutoff: 2023-04
+Current date: $date
+The request :
+
+$text
+"""
+)
+
 
 def fix_text(text):
-    prompt = PROMPT_TEMPLATE.substitute(text=text)
+    prompt = FIX_PROMPT_TEMPLATE.substitute(text=text)
     response = httpx.post(
         OLLAMA_ENDPOINT,
         json={"prompt": prompt, **OLLAMA_CONFIG},
@@ -39,23 +51,35 @@ def fix_text(text):
         return None
     return response.json()["response"].strip()
 
+def instr_text(text):
+    cur_date = date.today()
+    prompt = INSTR_PROMPT_TEMPLATE.substitute(date=cur_date, text=text)
+    response = httpx.post(
+        OLLAMA_ENDPOINT,
+        json={"prompt": prompt, **OLLAMA_CONFIG},
+        headers={"Content-Type": "application/json"},
+        timeout=10,
+    )
+    if response.status_code != 200:
+        print("Error", response.status_code)
+        return None
+    return response.json()["response"].strip()
 
-def fix_current_line():
+def fix_current_line(usecase="fix"):
     # macOS short cut to select current line: Cmd+Shift+Left
-    controller.press(Key.cmd)
-    controller.press(Key.shift)
-    controller.press(Key.left)
+    # win short cut to select current line: shift+home
+    with controller.pressed(Key.shift):
+        controller.tap(Key.home)
+    time.sleep(0.1)
+    if usecase == "fix":
+        fix_selection(usecase="fix")
+    elif usecase == "instruct":
+        fix_selection(usecase="instruct")
 
-    controller.release(Key.cmd)
-    controller.release(Key.shift)
-    controller.release(Key.left)
 
-    fix_selection()
-
-
-def fix_selection():
+def fix_selection(usecase="fix"):
     # 1. Copy selection to clipboard
-    with controller.pressed(Key.cmd):
+    with controller.pressed(Key.ctrl): #cmd
         controller.tap("c")
 
     # 2. Get the clipboard string
@@ -65,7 +89,10 @@ def fix_selection():
     # 3. Fix string
     if not text:
         return
-    fixed_text = fix_text(text)
+    if usecase == "fix":
+        fixed_text = fix_text(text)
+    elif usecase == "instruct":
+        fixed_text = instr_text(text)
     if not fixed_text:
         return
 
@@ -74,17 +101,21 @@ def fix_selection():
     time.sleep(0.1)
 
     # 5. Paste the clipboard and replace the selected text
-    with controller.pressed(Key.cmd):
+    with controller.pressed(Key.ctrl): #.cmd
         controller.tap("v")
 
 
 def on_f9():
-    fix_current_line()
+    fix_current_line(usecase="fix")
 
 
 def on_f10():
-    fix_selection()
+    fix_current_line(usecase="instruct")
+
+def on_f11():
+    fix_selection(usecase="instruct")
 
 
-with keyboard.GlobalHotKeys({"<101>": on_f9, "<109>": on_f10}) as h:
+# on Win, '<120>'==F9, '<121>'==F10
+with keyboard.GlobalHotKeys({'<120>': on_f9, '<121>': on_f10, '<122>': on_f11}) as h:
     h.join()
