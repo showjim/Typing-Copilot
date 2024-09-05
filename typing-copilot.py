@@ -163,7 +163,7 @@ def on_f9():
 
 
 def on_f10():
-    asyncio.run(chatbot.afix_selection(usecase="instruct"))
+    asyncio.run(chatbot.afix_current_line(usecase="instruct"))
 
 def on_f11():
     asyncio.run(chatbot.afix_selection(usecase="instruct"))
