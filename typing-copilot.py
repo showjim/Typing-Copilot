@@ -8,12 +8,13 @@ from datetime import date
 
 import ollama, httpx
 
-controller = Controller()
+
 
 
 class OllamaChatBot():
     def __init__(self):
         super().__init__()
+        self.controller = Controller()
         self.OLLAMA_BASE = "http://localhost:11434"
         self.OLLAMA_ENDPOINT = "http://localhost:11434/api/generate"
         self.OLLAMA_CONFIG = {
@@ -71,8 +72,8 @@ class OllamaChatBot():
             time.sleep(0.01)
 
             # 2. Paste the clipboard and replace the selected text
-            with controller.pressed(Key.ctrl):  # .cmd
-                controller.tap("v")
+            with self.controller.pressed(Key.ctrl):  # .cmd
+                self.controller.tap("v")
 
     async def ainstr_text(self, text):
         self.aclient = ollama.AsyncClient(host=self.OLLAMA_BASE)
@@ -85,14 +86,14 @@ class OllamaChatBot():
             time.sleep(0.01)
 
             # 2. Paste the clipboard and replace the selected text
-            with controller.pressed(Key.ctrl):  # .cmd
-                controller.tap("v")
+            with self.controller.pressed(Key.ctrl):  # .cmd
+                self.controller.tap("v")
 
     def fix_current_line(self, usecase="fix"):
         # macOS short cut to select current line: Cmd+Shift+Left
         # win short cut to select current line: shift+home
-        with controller.pressed(Key.shift):
-            controller.tap(Key.home)
+        with self.controller.pressed(Key.shift):
+            self.controller.tap(Key.home)
         time.sleep(0.1)
         if usecase == "fix":
             self.fix_selection(usecase="fix")
@@ -101,8 +102,8 @@ class OllamaChatBot():
 
     def fix_selection(self, usecase="fix"):
         # 1. Copy selection to clipboard
-        with controller.pressed(Key.ctrl):  # cmd
-            controller.tap("c")
+        with self.controller.pressed(Key.ctrl):  # cmd
+            self.controller.tap("c")
 
         # 2. Get the clipboard string
         time.sleep(0.1)
@@ -123,14 +124,14 @@ class OllamaChatBot():
         time.sleep(0.01)
 
         # 5. Paste the clipboard and replace the selected text
-        with controller.pressed(Key.ctrl):  # .cmd
-            controller.tap("v")
+        with self.controller.pressed(Key.ctrl):  # .cmd
+            self.controller.tap("v")
 
     async def afix_current_line(self, usecase="fix"):
         # macOS short cut to select current line: Cmd+Shift+Left
         # win short cut to select current line: shift+home
-        with controller.pressed(Key.shift):
-            controller.tap(Key.home)
+        with self.controller.pressed(Key.shift):
+            self.controller.tap(Key.home)
         time.sleep(0.1)
         if usecase == "fix":
             await self.afix_selection(usecase="fix")
@@ -139,8 +140,8 @@ class OllamaChatBot():
 
     async def afix_selection(self, usecase="fix"):
         # 1. Copy selection to clipboard
-        with controller.pressed(Key.ctrl):  # cmd
-            controller.tap("c")
+        with self.controller.pressed(Key.ctrl):  # cmd
+            self.controller.tap("c")
 
         # 2. Get the clipboard string
         time.sleep(0.1)
