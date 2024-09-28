@@ -1,11 +1,11 @@
 import time
+from datetime import date
 from string import Template
 
 import httpx
+import pyperclip
 from pynput import keyboard
 from pynput.keyboard import Key, Controller
-import pyperclip
-from datetime import date
 
 time.sleep(0.1)
 
@@ -51,6 +51,7 @@ def fix_text(text):
         return None
     return response.json()["response"].strip()
 
+
 def instr_text(text):
     cur_date = date.today()
     prompt = INSTR_PROMPT_TEMPLATE.substitute(date=cur_date, text=text)
@@ -64,6 +65,7 @@ def instr_text(text):
         print("Error", response.status_code)
         return None
     return response.json()["response"].strip()
+
 
 def fix_current_line(usecase="fix"):
     # macOS short cut to select current line: Cmd+Shift+Left
@@ -79,7 +81,7 @@ def fix_current_line(usecase="fix"):
 
 def fix_selection(usecase="fix"):
     # 1. Copy selection to clipboard
-    with controller.pressed(Key.ctrl): #cmd
+    with controller.pressed(Key.ctrl):  # cmd
         controller.tap("c")
 
     # 2. Get the clipboard string
@@ -101,7 +103,7 @@ def fix_selection(usecase="fix"):
     time.sleep(0.1)
 
     # 5. Paste the clipboard and replace the selected text
-    with controller.pressed(Key.ctrl): #.cmd
+    with controller.pressed(Key.ctrl):  # .cmd
         controller.tap("v")
 
 
@@ -111,6 +113,7 @@ def on_f9():
 
 def on_f10():
     fix_current_line(usecase="instruct")
+
 
 def on_f11():
     fix_selection(usecase="instruct")

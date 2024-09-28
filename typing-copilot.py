@@ -1,20 +1,20 @@
-import time
-from string import Template
 import asyncio
+import logging
+import platform
+import sys
+import time
+from datetime import date
+from string import Template
+
+import ollama
+import pyperclip
 from pynput import keyboard
 from pynput.keyboard import Key, Controller
-import pyperclip
-from datetime import date
-import platform
-import ollama
-import logging
-import sys
-
-from sqlalchemy import false
 
 # Set up logging
-logging.basicConfig(filename='typing_copilot.log', level=logging.DEBUG, 
+logging.basicConfig(filename='typing_copilot.log', level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 class OllamaChatBot():
     def __init__(self):
@@ -192,9 +192,10 @@ class OllamaChatBot():
             logging.warning("No text selected")
             return
         if usecase == "fix":
-           await self.afix_text(text)
+            await self.afix_text(text)
         elif usecase == "instruct":
             await self.ainstr_text(text)
+
 
 try:
     # Initialize the OllamaChatBot
@@ -203,6 +204,7 @@ try:
 except Exception as e:
     logging.error(f"Failed to create OllamaChatBot instance: {str(e)}")
     sys.exit(1)
+
 
 def on_f9():
     try:
@@ -213,6 +215,7 @@ def on_f9():
     except Exception as e:
         logging.error(f"Error processing F9 hotkey: {str(e)}")
 
+
 def on_f10():
     try:
         # Handle F10 key press: process current line as instruction
@@ -221,6 +224,7 @@ def on_f10():
     except Exception as e:
         logging.error(f"Error processing F10 hotkey: {str(e)}")
 
+
 def on_f11():
     try:
         # Handle F11 key press: process selected text as instruction
@@ -228,6 +232,7 @@ def on_f11():
         logging.info("F11 hotkey processed")
     except Exception as e:
         logging.error(f"Error processing F11 hotkey: {str(e)}")
+
 
 def on_press(key):
     # Handle key press events
@@ -238,6 +243,7 @@ def on_press(key):
     elif key == keyboard.Key.f11:
         on_f11()
 
+
 def main():
     try:
         # Start the keyboard listener
@@ -246,6 +252,7 @@ def main():
             listener.join()
     except Exception as e:
         logging.error(f"Error in main function: {str(e)}")
+
 
 if __name__ == "__main__":
     logging.info("Script started")

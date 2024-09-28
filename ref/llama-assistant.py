@@ -4,10 +4,10 @@
 import time
 from string import Template
 
+import pyperclip
 from llama_cpp import Llama
 from pynput import keyboard
 from pynput.keyboard import Key, Controller
-import pyperclip
 
 llm = Llama.from_pretrained(
     repo_id="Qwen/Qwen2-0.5B-Instruct-GGUF",
