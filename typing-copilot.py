@@ -65,7 +65,7 @@ class OllamaChatBot():
             for part in self.client.generate(prompt=prompt, **self.OLLAMA_CONFIG):
                 fixed_text = part['response']
                 pyperclip.copy(fixed_text)
-                time.sleep(0.01)
+                time.sleep(0.1)
                 self.paste_text()
             logging.info("Text fixed successfully")
         except Exception as e:
@@ -92,7 +92,7 @@ class OllamaChatBot():
             async for part in await self.aclient.generate(prompt=prompt, **self.OLLAMA_CONFIG):
                 fixed_text = part['response']
                 pyperclip.copy(fixed_text)
-                time.sleep(0.01)
+                time.sleep(0.1)
                 self.paste_text()
             logging.info("Async text fixing completed")
         except Exception as e:
@@ -107,7 +107,7 @@ class OllamaChatBot():
             async for part in await self.aclient.generate(prompt=prompt, **self.OLLAMA_CONFIG):
                 fixed_text = part['response']
                 pyperclip.copy(fixed_text)
-                time.sleep(0.01)
+                time.sleep(0.1)
                 self.paste_text()
             logging.info("Async instruction processing completed")
         except Exception as e:
@@ -122,7 +122,7 @@ class OllamaChatBot():
             else:
                 with self.controller.pressed(Key.shift):
                     self.controller.tap(Key.home)
-            time.sleep(0.001)
+            time.sleep(0.1)
             logging.info("Current line selected")
         except Exception as e:
             logging.error(f"Error in select_current_line: {str(e)}")
@@ -132,7 +132,7 @@ class OllamaChatBot():
             # Copy selected text to clipboard
             with self.controller.pressed(Key.cmd if self.is_mac else Key.ctrl):
                 self.controller.tap("c")
-            time.sleep(0.001)
+            time.sleep(0.1)
             logging.info("Text copied: " + pyperclip.paste())
         except Exception as e:
             logging.error(f"Error in copy_text: {str(e)}")
@@ -197,8 +197,8 @@ except Exception as e:
 def on_f9():
     try:
         # Handle F9 key press: fix current line
-        chatbot.fix_current_line(usecase="fix")
-        # asyncio.run(chatbot.afix_current_line(usecase="fix"))
+        # chatbot.fix_current_line(usecase="fix")
+        asyncio.run(chatbot.afix_current_line(usecase="fix"))
         logging.info("F9 hotkey processed")
     except Exception as e:
         logging.error(f"Error processing F9 hotkey: {str(e)}")
