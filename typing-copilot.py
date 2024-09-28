@@ -10,6 +10,8 @@ import ollama
 import logging
 import sys
 
+from sqlalchemy import false
+
 # Set up logging
 logging.basicConfig(filename='typing_copilot.log', level=logging.DEBUG, 
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -59,14 +61,19 @@ class OllamaChatBot():
         )
 
     def fix_text(self, text):
+        initialWait = True
         # Generate a prompt to fix the text
         prompt = self.FIX_PROMPT_TEMPLATE.substitute(text=text)
         try:
             for part in self.client.generate(prompt=prompt, **self.OLLAMA_CONFIG):
                 fixed_text = part['response']
+                if initialWait:
+                    time.sleep(0.5)
+                    initialWait = False
                 pyperclip.copy(fixed_text)
                 time.sleep(0.1)
                 self.paste_text()
+                time.sleep(0.01)
             logging.info("Text fixed successfully")
         except Exception as e:
             logging.error(f"Error in fix_text: {str(e)}")
@@ -86,6 +93,7 @@ class OllamaChatBot():
 
     async def afix_text(self, text):
         try:
+            initialWait = True
             # Use asynchronous client for text fixing
             self.aclient = ollama.AsyncClient(host=self.OLLAMA_BASE)
             prompt = self.FIX_PROMPT_TEMPLATE.substitute(text=text)
@@ -94,6 +102,7 @@ class OllamaChatBot():
                 pyperclip.copy(fixed_text)
                 time.sleep(0.1)
                 self.paste_text()
+                time.sleep(0.05)
             logging.info("Async text fixing completed")
         except Exception as e:
             logging.error(f"Error in afix_text: {str(e)}")
@@ -157,6 +166,7 @@ class OllamaChatBot():
     def fix_selection(self, usecase="fix"):
         # Fix or process the selected text
         self.copy_text()
+        ## Get the clipboard string
         text = pyperclip.paste()
         if not text:
             logging.warning("No text selected")
