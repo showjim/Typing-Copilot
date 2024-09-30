@@ -24,7 +24,7 @@ class OllamaChatBot():
         self.OLLAMA_BASE = "http://localhost:11434"
         self.OLLAMA_ENDPOINT = "http://localhost:11434/api/generate"
         self.OLLAMA_CONFIG = {
-            "model": "qwen2.5:0.5b",
+            "model": "qwen2.5:1.5b", #llama3.2:1b qwen2.5:0.5b
             "keep_alive": "5m",
             "stream": True,
         }
