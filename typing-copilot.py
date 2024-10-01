@@ -11,6 +11,10 @@ import pyperclip
 from pynput import keyboard
 from pynput.keyboard import Key, Controller
 
+import pystray
+from PIL import Image, ImageDraw
+import threading
+
 # Set up logging
 logging.basicConfig(filename='typing_copilot.log', level=logging.DEBUG,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -24,7 +28,7 @@ class OllamaChatBot():
         self.OLLAMA_BASE = "http://localhost:11434"
         self.OLLAMA_ENDPOINT = "http://localhost:11434/api/generate"
         self.OLLAMA_CONFIG = {
-            "model": "qwen2.5:1.5b", #llama3.2:1b qwen2.5:0.5b
+            "model": "qwen2.5:1.5b",  # Default model
             "keep_alive": "5m",
             "stream": True,
         }
@@ -60,6 +64,10 @@ class OllamaChatBot():
         """
         )
 
+    def set_model(self, model):
+        self.OLLAMA_CONFIG["model"] = model
+        logging.info(f"Model set to: {model}")
+
     def fix_text(self, text):
         initialWait = True
         # Generate a prompt to fix the text
@@ -93,7 +101,6 @@ class OllamaChatBot():
 
     async def afix_text(self, text):
         try:
-            initialWait = True
             # Use asynchronous client for text fixing
             self.aclient = ollama.AsyncClient(host=self.OLLAMA_BASE)
             prompt = self.FIX_PROMPT_TEMPLATE.substitute(text=text)
@@ -197,6 +204,79 @@ class OllamaChatBot():
             await self.ainstr_text(text)
 
 
+class TrayIcon:
+    def __init__(self, chatbot):
+        self.chatbot = chatbot
+        self.icon = None
+        self.current_model = self.chatbot.OLLAMA_CONFIG["model"]
+
+    def create_image(self):
+        # Create a simple image for the system tray icon
+        width = 64
+        height = 64
+        color1 = (0, 128, 255)
+        color2 = (255, 255, 255)
+        image = Image.new('RGB', (width, height), color1)
+        dc = ImageDraw.Draw(image)
+        dc.rectangle([width // 2, 0, width, height], fill=color2)
+        return image
+
+    def get_ollama_models(self):
+        try:
+            models = self.chatbot.client.list()
+            return [model['name'] for model in models['models']]
+        except Exception as e:
+            logging.error(f"Error getting Ollama models: {e}")
+            return []
+
+    def set_model(self, model:str):
+        self.chatbot.set_model(model)
+        self.current_model = model
+        self.icon.notify(f"Model set to {model}", "Model Changed")
+        self.update_menu()
+
+    def choose_llm(self, icon, item):
+        models = self.get_ollama_models()
+        if not models:
+            icon.notify("No Ollama models found", "Error")
+            return
+        self.update_menu(models)
+
+    def create_menu(self, models=None):
+        if models is None:
+            models = []
+        
+        model_menu = pystray.Menu(*[
+            pystray.MenuItem(
+                f"{'✓ ' if model == self.current_model else ''}  {model}",
+                lambda _, m=model: self.set_model(m.text.strip())
+            ) for model in models
+        ])
+
+        return pystray.Menu(
+            pystray.MenuItem("Choose LLM", pystray.Menu(
+                pystray.MenuItem("Refresh Models", self.choose_llm),
+                pystray.Menu.SEPARATOR,
+                *model_menu
+            )),
+            pystray.MenuItem("Exit", self.exit_app)
+        )
+
+    def update_menu(self, models=None):
+        if self.icon:
+            self.icon.menu = self.create_menu(models)
+
+    def exit_app(self, icon, item):
+        icon.stop()
+        sys.exit(0)
+
+    def run(self):
+        image = self.create_image()
+        menu = self.create_menu()
+        self.icon = pystray.Icon("typing-copilot", image, "Typing Copilot", menu)
+        self.icon.run()
+
+
 try:
     # Initialize the OllamaChatBot
     chatbot = OllamaChatBot()
@@ -209,7 +289,6 @@ except Exception as e:
 def on_f9():
     try:
         # Handle F9 key press: fix current line
-        # chatbot.fix_current_line(usecase="fix")
         asyncio.run(chatbot.afix_current_line(usecase="fix"))
         logging.info("F9 hotkey processed")
     except Exception as e:
@@ -244,12 +323,26 @@ def on_press(key):
         on_f11()
 
 
-def main():
+def run_keyboard_listener():
     try:
         # Start the keyboard listener
         with keyboard.Listener(on_press=on_press) as listener:
             logging.info("Keyboard listener started")
             listener.join()
+    except Exception as e:
+        logging.error(f"Error in keyboard listener: {str(e)}")
+
+
+def main():
+    try:
+        # Create and run the tray icon
+        tray_icon = TrayIcon(chatbot)
+        tray_thread = threading.Thread(target=tray_icon.run)
+        tray_thread.start()
+
+        # Run the keyboard listener
+        run_keyboard_listener()
+
     except Exception as e:
         logging.error(f"Error in main function: {str(e)}")
 
