@@ -21,7 +21,7 @@ Before you begin, ensure you have met the following requirements:
 
 1. Clone this repository:
    ```
-   git clone https://github.com/yourusername/typing-copilot.git
+   git clone https://github.com/showjim/Typing-Copilot.git
    cd typing-copilot
    ```
 
@@ -63,15 +63,8 @@ If you encounter any issues:
 2. Ensure you have the latest version of the required packages
 3. Check the `typing_copilot.log` file for error messages
 
-## Contributing
-
-Contributions to Typing Copilot are welcome. Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## Acknowledgments
 
 - Ollama for providing the language models
 - The Python community for the excellent libraries used in this project
+- Thanks to patrickloeber, allI have done are based on this repo [patrickloeber/ai-typing-assistant](https://github.com/patrickloeber/ai-typing-assistant)
