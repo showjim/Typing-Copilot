@@ -124,13 +124,15 @@ def main():
         chatbot = OllamaChatBot()
         logging.info("OllamaChatBot instance created successfully")
 
-        # Create and run the tray icon
+        # Create the tray icon
         tray_icon = TrayIcon(chatbot)
-        tray_thread = threading.Thread(target=tray_icon.run)
-        tray_thread.start()
 
-        # Run the keyboard listener
-        run_keyboard_listener(chatbot)
+        # Run the keyboard listener in a separate thread
+        keyboard_thread = threading.Thread(target=run_keyboard_listener, args=(chatbot,))
+        keyboard_thread.start()
+
+        # Run the tray icon on the main thread
+        tray_icon.run()
 
     except Exception as e:
         logging.error(f"Error in main function: {str(e)}")
