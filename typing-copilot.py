@@ -78,7 +78,8 @@ class TrayIcon:
 def on_f9(chatbot):
     try:
         # Handle F9 key press: fix current line
-        asyncio.run(chatbot.afix_current_line(usecase="fix"))
+        # asyncio.run(chatbot.afix_current_line(usecase="fix"))
+        chatbot.fix_current_line(usecase="fix")
         logging.info("F9 hotkey processed")
     except Exception as e:
         logging.error(f"Error processing F9 hotkey: {str(e)}")

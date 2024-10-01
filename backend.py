@@ -67,11 +67,11 @@ class OllamaChatBot:
         try:
             for part in self.client.generate(prompt=prompt, **self.OLLAMA_CONFIG):
                 fixed_text = part['response']
-                if initialWait:
-                    time.sleep(0.5)
-                    initialWait = False
+                # if initialWait:
+                #     time.sleep(0.5)
+                #     initialWait = False
                 pyperclip.copy(fixed_text)
-                time.sleep(0.1)
+                time.sleep(0.15)
                 self.paste_text()
                 time.sleep(0.01)
             logging.info("Text fixed successfully")
@@ -99,9 +99,9 @@ class OllamaChatBot:
             async for part in await self.aclient.generate(prompt=prompt, **self.OLLAMA_CONFIG):
                 fixed_text = part['response']
                 pyperclip.copy(fixed_text)
-                time.sleep(0.1)
+                time.sleep(0.15)
                 self.paste_text()
-                time.sleep(0.05)
+                time.sleep(0.01)
             logging.info("Async text fixing completed")
         except Exception as e:
             logging.error(f"Error in afix_text: {str(e)}")
