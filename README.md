@@ -67,4 +67,4 @@ If you encounter any issues:
 
 - Ollama for providing the language models
 - The Python community for the excellent libraries used in this project
-- Thanks to patrickloeber, allI have done are based on this repo [patrickloeber/ai-typing-assistant](https://github.com/patrickloeber/ai-typing-assistant)
+- Thanks to patrickloeber, all I have done are based on this repo [patrickloeber/ai-typing-assistant](https://github.com/patrickloeber/ai-typing-assistant)
